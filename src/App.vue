@@ -5,6 +5,11 @@
       <nav class="">
         <RouterLink to="/" class="mr-4">Home</RouterLink>
         <RouterLink to="/about" class="mr-4">About</RouterLink>
+        <RouterLink to="/jewelry" class="mr-4">Jewelry</RouterLink>
+        <RouterLink to="/auth" class="mr-4">Auth</RouterLink>
+        <RouterLink to="/admin" class="mr-4">Admin</RouterLink>
+
+
 
         <!-- RouterLink to products, Auth, Admin & and logout button -->
 
