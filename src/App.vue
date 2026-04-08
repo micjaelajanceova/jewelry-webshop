@@ -7,18 +7,19 @@
         <RouterLink to="/about" class="mr-4">About</RouterLink>
         <RouterLink to="/jewelry" class="mr-4">Jewelry</RouterLink>
         <RouterLink to="/auth" class="mr-4">Auth</RouterLink>
-        <RouterLink to="/admin" class="mr-4">Admin</RouterLink>
+        <RouterLink v-if="isLoggedIn" to="/admin" class="mr-4">Admin</RouterLink>
 
+        <button v-if="isLoggedIn" @click="logout" class="bg-red-600 text-white p-2 rounded hover:bg-red-700">Logout</button>
 
 
         <!-- RouterLink to products, Auth, Admin & and logout button -->
 
 
         <!-- toggle cart button -->
-
+        <button @click="toggleCart" class="bg-green-600 text-white p-2 rounded hover:bg-green-700 ml-2">Cart</button>
 
         <!-- Routerlink to orders -->
-
+          <RouterLink v-if="isLoggedIn" to="/orders" class="mr-4">Orders</RouterLink>
 
       </nav>
     </div>
@@ -27,12 +28,28 @@
   <RouterView />
 
   <!-- CartBasket component -->
-
+  <CartBasket v-model="isCartOpen" :isVisible="isCartOpen" />
 
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import { RouterLink, RouterView } from 'vue-router'
+import { useUsers } from './modules/auth/useUsers';
+import { state } from './modules/globalStates/state';
+
+import {ref} from 'vue';
+import CartBasket from './components/cart/CartBasketView.vue';
+
+const isCartOpen = ref(false);
+const toggleCart = () =>
+isCartOpen.value = !isCartOpen.value;
+
+
+
+const { logout } = useUsers()
+
+const isLoggedIn = computed(() => state.isLoggedIn);
 
 </script>
 

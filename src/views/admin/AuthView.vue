@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useUsers } from '@/modules/useUsers';
+import { useUsers } from '@/modules/auth/useUsers';
 
 const { fetchToken, registerUser, logout, name, email, password } = useUsers();
 

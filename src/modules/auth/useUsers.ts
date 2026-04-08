@@ -1,9 +1,10 @@
 import {ref} from 'vue'
-import type { User } from '../interfaces/interfaces'
+import type { User } from '../../interfaces/interfaces'
+import { state } from '../globalStates/state';
 
 export const useUsers = () => {
     const token = ref<string | null>(null);
-    const isLoggedIn = ref<boolean>(false);
+    // const isLoggedIn = ref<boolean>(false);
     const error = ref<string | null>(null);
     const User = ref<User | null>(null);
 
@@ -14,7 +15,7 @@ export const useUsers = () => {
 
     const fetchToken = async (email:string, password:string): Promise<void> => {
         try {
-            const response = await fetch('http://localhost:4000/api/user/login', {
+            const response = await fetch('https://jewelry-rest-api.onrender.com/api/user/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -32,16 +33,16 @@ export const useUsers = () => {
             const authResponse = await response.json();
             token.value = authResponse.data.token;
             User.value = authResponse.data.user;
-            isLoggedIn.value = true;
+            state.isLoggedIn= true;
 
             localStorage.setItem('token', authResponse.data.token)
-            localStorage.setItem('userId', authResponse.data.userId)
+            localStorage.setItem('userId', authResponse.data.userID)
             console.log('Login successful', authResponse)
             console.log('token', token.value)
     }
         catch (err) {
             error.value = (err as Error).message || 'An error occurred during login'
-            isLoggedIn.value = false;
+            state.isLoggedIn = false;
         }
     }
 
@@ -49,7 +50,7 @@ export const useUsers = () => {
     // register
     const registerUser = async (name:string, email:string, password:string): Promise<void> => {
         try {
-            const response = await fetch('http://localhost:4000/api/user/register', {
+            const response = await fetch('https://jewelry-rest-api.onrender.com/api/user/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ export const useUsers = () => {
     const logout = () => {
         token.value = null;
         User.value = null;
-        isLoggedIn.value = false;
+        state.isLoggedIn= false;
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
         console.log('User logged out')
@@ -86,7 +87,7 @@ export const useUsers = () => {
 
     return {
         token,
-        isLoggedIn,
+        isLoggedIn: state.isLoggedIn,
         error,
         User,
         name,

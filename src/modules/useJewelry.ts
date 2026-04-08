@@ -11,7 +11,7 @@ export const useJewelry = () => {
         error.value = null;
 
         try {
-            const response = await fetch('http://localhost:4000/api/jewelry');
+            const response = await fetch('https://jewelry-rest-api.onrender.com/api/jewelry');
             if (!response.ok) {
                 throw new Error('Failed to fetch jewelry');
             }
@@ -76,7 +76,7 @@ export const useJewelry = () => {
             console.log("id", userId);
             console.log("wuut", jewelryWithDefaults);
 
-            const response = await fetch('http://localhost:4000/api/jewelry', {
+            const response = await fetch('https://jewelry-rest-api.onrender.com/api/jewelry', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -114,82 +114,79 @@ export const useJewelry = () => {
         }
     }
 
+const deleteJewelryFromServer = async (id: string, token: string): Promise<void> => {
+    const response = await fetch(`https://jewelry-rest-api.onrender.com/api/jewelry/${id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
 
-    const deleteJewelryFromServer = async (id: string): Promise<void> => {
-        const response = await fetch(`http://localhost:4000/api/jewelry/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'authorization': localStorage.getItem('token') || ''
-            }
-        })
-        if (!response.ok) {
-                throw new Error('Failed to delete jewelry')
-                console.log('Failed to delete jewelry with ID:', id);
-            }
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(text || 'Failed to delete jewelry')
+    }
+  }
+
+  const removeJewelryFromState = (id: string): void => {
+    jewelry.value = jewelry.value.filter(jewelryItem => jewelryItem._id !== id)
+    console.log('Deleted jewelry with ID:', id)
+  }
+
+  const deleteJewelry = async (id: string): Promise<void> => {
+    try {
+      const { token } = getTokenAndUserId()
+      await deleteJewelryFromServer(id, token)
+      removeJewelryFromState(id)
+    } catch (err) {
+      error.value = (err as Error).message
+    }
+  }
+
+  const updateJewelryOnServer = async (
+    id: string,
+    updatedJewelry: Partial<Jewelry>,
+    token: string
+  ) => {
+    const response = await fetch(`https://jewelry-rest-api.onrender.com/api/jewelry/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(updatedJewelry)
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(text || 'Failed to update jewelry')
     }
 
-    const removeJewelryFromState = (id: string): void => {
-
-        jewelry.value = jewelry.value.filter(jewelryItem => jewelryItem._id !== id);
-        console.log('Deleted jewelry with ID:', id);
+    const responseData = await response.text()
+    try {
+      return JSON.parse(responseData)
+    } catch {
+      return { message: responseData } as unknown as Jewelry
     }
+  }
 
-    const deleteJewelry = async (id: string): Promise<void> => {
-        try {
-            const { token } = getTokenAndUserId()
-            await deleteJewelryFromServer(id);
-            removeJewelryFromState(id);
-
-            console.log('Deleting jewelry with ID:', id);
-          
-        }
-        catch (err) {
-            error.value = (err as Error).message
-        }
+  const updateJewelryInState = (id: string, updatedJewelry: Jewelry) => {
+    const index = jewelry.value.findIndex(item => item._id === id)
+    if (index !== -1) {
+      jewelry.value[index] = updatedJewelry
     }
-    
+  }
 
-    const updateJewelryOnServer = async (id: string, updatedJewelry: Partial<Jewelry>, token: string) => {
-        const response = await fetch(`http://localhost:4000/api/jewelry/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'authorization': token
-            },
-            body: JSON.stringify(updatedJewelry)
-        });
-        if (!response.ok) {
-            throw new Error('Failed to update jewelry');
-        }
-
-        const responseData = await response.text();
-        try{
-            return JSON.parse(responseData);
-        }
-        catch {
-            return { message: responseData} as unknown as Jewelry; 
-        }
-       // return await response.json()
+  const updateJewelry = async (id: string, updatedJewelry: Partial<Jewelry>): Promise<void> => {
+    try {
+      const { token } = getTokenAndUserId()
+      const updatedJewelryResponse = await updateJewelryOnServer(id, updatedJewelry, token)
+      updateJewelryInState(id, updatedJewelryResponse)
+      await fetchJewelry()
+    } catch (err) {
+      error.value = (err as Error).message
     }
-
-    const updateJewelryInState = (id: string, updatedJewelry: Jewelry) => {
-        const index = jewelry.value.findIndex(item => item._id === id);
-        if (index !== -1) {
-            jewelry.value[index] = updatedJewelry
-        }
-    }
-
-    const updateJewelry = async (id: string, updatedJewelry: Partial<Jewelry>): Promise<void> => {
-        try {
-            const { token } = getTokenAndUserId();
-            const updatedJewelryResponse = await updateJewelryOnServer(id, updatedJewelry, token);
-            updateJewelryInState(id, updatedJewelryResponse);
-            await fetchJewelry(); 
-        }
-        catch (err) {
-            error.value = (err as Error).message
-        }
-    }
+  }
 
 
     return {
