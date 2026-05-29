@@ -1,84 +1,130 @@
 <template>
-    <transition name="fade-slide">
-      <div v-if="isVisible" @click.self="toggleCart" class="fixed inset-0 bg-black bg-opacity-50 flex justify-end" > <!-- Overlay + toggleCart -->
-        <div @click.stop class="cart-content bg-[#ffffff] w-96 h-full p-4 overflow-y-auto" > <!-- Cart content & .stop -->
-          <!-- top close X -->
-          <button @click="toggleCart" class="absolute top-3 right-4 text-4xl text-red-400 hover:text-red-700">&times;</button> <!-- Close button -->
+  <transition name="fade-slide">
+    <div
+      v-if="isVisible"
+      @click.self="toggleCart"
+      class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm flex justify-end"
+    >
+      <div @click.stop class="cart-panel bg-white w-full max-w-sm h-full flex flex-col shadow-2xl">
 
-          <h2 class="text-2xl font-bold mb-4">Cart</h2>
-          <div v-for="item in cart" :key="item._id" class="mb-4"> <!-- Loop through the cart items -->
-
-            <div class="flex pb-2">
-              <img :src="item.imageURL" alt="Product Image" class="h-24 w-28 object-cover rounded-lg"> <!-- Product image -->
-              <div class="flex ml-2 flex-col justify-between">
-                <div>
-                  <p class="font-semibold"> {{ item.name }} </p> <!-- Product name -->
-                  <p>Price: ${{ item.price.toFixed(2) }}</p> <!-- Product price -->
-                  <p>Total: ${{ cartTotalIndividualJewelry(item._id).toFixed(2) }}</p> <!-- Total price of the product -->
-                </div>
-                <div class="flex items-center">
-                  <button @click="updatedQuantity(item._id, item.quantity - 1)" class="bg-orange-600 px-2">-</button>  <!-- Decrease quantity -->
-                  <span class="mx-2"> {{ item.quantity }} </span>
-                  <button @click="updatedQuantity(item._id, item.quantity + 1)" class="bg-teal-600 px-2">+</button>   <!-- Increase quantity -->
-                </div>
-
-              </div>
-
-            </div>
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-5 border-b border-stone-100">
+          <div>
+            <h2 class="font-serif text-xl text-stone-900 font-semibold">Your Cart</h2>
+            <p class="text-stone-400 text-xs tracking-wide mt-0.5">{{ cart.length }} item{{ cart.length !== 1 ? 's' : '' }}</p>
           </div>
+          <button @click="toggleCart" class="p-2 text-stone-400 hover:text-stone-700 transition-colors" aria-label="Close cart">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-          <p v-if="cart.length === 0" class="text-center">Cart is empty</p> <!-- If cart is empty -->
+        <!-- Items -->
+        <div class="flex-1 overflow-y-auto px-6 py-4 space-y-5">
+          <p v-if="cart.length === 0" class="text-center text-stone-400 text-sm pt-16">
+            Your cart is empty
+          </p>
 
-          <div class="pt-4 border-t ">
-            <p class="text-right font-semibold">Subtotal: $ {{ cartTotal() }}</p> <!-- Total in the cart -->
-            <p class="text-right font-semibold">Sales tax: $ {{ salesTax() }}</p> <!-- Salestax in the cart -->
-            <p class="font-semibold">Coupon Code:</p>
-            <input type="text" class="border p-1 pr-2 bg-[#181818] text-right w-28" placeholder="Enter code" v-model="code"> <!-- Coupon code -->
-            <p class="text-right font-semibold">Grand Total: $ {{ grandTotal() }}</p> <!-- Grand total in the cart -->
-            <div class="flex justify-end">
-              <button @click="checkoutBuy" class="bg-green-600 text-white p-2 mt-4 rounded hover:bg-green-700">Checkout</button> <!-- Checkout button on click -->
+          <div v-for="item in cart" :key="item._id" class="flex gap-4">
+            <div class="flex-shrink-0 w-20 h-20 bg-stone-100 overflow-hidden rounded-sm">
+              <img :src="item.imageURL" :alt="item.name" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-stone-900 text-sm font-semibold leading-snug truncate">{{ item.name }}</p>
+              <p class="text-stone-400 text-xs mt-0.5">${{ item.price.toFixed(2) }} each</p>
+              <div class="flex items-center gap-3 mt-2">
+                <button
+                  @click="updatedQuantity(item._id, item.quantity - 1)"
+                  class="w-6 h-6 flex items-center justify-center border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900 transition-colors text-sm"
+                >−</button>
+                <span class="text-stone-900 text-sm font-medium w-4 text-center">{{ item.quantity }}</span>
+                <button
+                  @click="updatedQuantity(item._id, item.quantity + 1)"
+                  class="w-6 h-6 flex items-center justify-center border border-stone-200 text-stone-500 hover:border-stone-900 hover:text-stone-900 transition-colors text-sm"
+                >+</button>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-stone-900 text-sm font-semibold">${{ cartTotalIndividualJewelry(item._id).toFixed(2) }}</p>
             </div>
           </div>
         </div>
+
+        <!-- Footer -->
+        <div class="border-t border-stone-100 px-6 py-5 space-y-3 bg-stone-50">
+          <!-- Coupon -->
+          <div class="flex gap-2">
+            <input
+              type="text"
+              v-model="code"
+              placeholder="Coupon code"
+              class="input-field flex-1 py-2 text-xs"
+            />
+            <button class="btn-secondary py-2 px-3 text-xs !tracking-normal !uppercase-none">Apply</button>
+          </div>
+
+          <!-- Totals -->
+          <div class="space-y-1.5 text-sm">
+            <div class="flex justify-between text-stone-500">
+              <span>Subtotal</span>
+              <span>${{ cartTotal() }}</span>
+            </div>
+            <div class="flex justify-between text-stone-500">
+              <span>Tax</span>
+              <span>${{ salesTax() }}</span>
+            </div>
+            <div class="flex justify-between text-stone-900 font-semibold text-base pt-1 border-t border-stone-150">
+              <span>Grand Total</span>
+              <span>${{ grandTotal() }}</span>
+            </div>
+          </div>
+
+          <button @click="checkoutBuy" class="btn-primary w-full mt-2">
+            Proceed to Checkout
+          </button>
+        </div>
+
       </div>
-    </transition>
+    </div>
+  </transition>
 </template>
 
 <script setup lang="ts">
-import { useCart } from '@/modules/cart/useCart';
-import { useRouter } from 'vue-router';
+import { useCart } from '@/modules/cart/useCart'
+import { useRouter } from 'vue-router'
 
-const { cart, code, updatedQuantity, cartTotal, cartTotalIndividualJewelry, salesTax, grandTotal} = useCart();
+const { cart, code, updatedQuantity, cartTotal, cartTotalIndividualJewelry, salesTax, grandTotal } = useCart()
 
-const router = useRouter();
-const isVisible = defineModel<boolean>();
+const router = useRouter()
+const isVisible = defineModel<boolean>()
 
-const toggleCart = ():void | undefined => {
-  isVisible.value = !isVisible.value;
-};
+const toggleCart = (): void => {
+  isVisible.value = !isVisible.value
+}
 
-const checkoutBuy = ():void => {
-  router.push('/cart'); 
-  isVisible.value = false;
-};
-
-
+const checkoutBuy = (): void => {
+  router.push('/cart')
+  isVisible.value = false
+}
 </script>
 
 <style scoped>
-.fade-slide-enter-active, .fade-slide-leave-active {
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.25s ease;
 }
-
-.fade-slide-enter-from, .fade-slide-leave-to {
+.fade-slide-enter-from,
+.fade-slide-leave-to {
   opacity: 0;
 }
 
-.cart-content {
-  transition: transform 0.3s ease-in-out;
+.cart-panel {
+  transform: translateX(0);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
-.fade-slide-enter-from .cart-content, .fade-slide-leave-to .cart-content {
+.fade-slide-enter-from .cart-panel,
+.fade-slide-leave-to .cart-panel {
   transform: translateX(100%);
 }
 </style>

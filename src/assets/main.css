@@ -3,47 +3,77 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --full-width: 100%;
-
-  --linkColor: #63a9cd;
-  --linkColorHover: #65f6fe;
-  --input-field-color: #39ebb3;
-
-}
 * {
   box-sizing: border-box !important;
 }
 
 #app {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
   font-weight: normal;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: var(--linkColor);
-  transition: 0.4s;
-  padding: 3px;
+/* ── Typography helpers ───────────────────────── */
+.font-serif { font-family: 'Playfair Display', Georgia, serif; }
+
+/* ── Nav links ────────────────────────────────── */
+.nav-link {
+  @apply text-stone-600 text-sm font-medium tracking-wide transition-colors duration-200 no-underline hover:text-gold-600;
+  padding: 2px 0;
+}
+.nav-link.router-link-active {
+  @apply text-gold-600;
+  border-bottom: 1px solid currentColor;
 }
 
-@media (hover: hover) {
-  a:hover {
-    color: var(--linkColorHover);
-  }
+/* ── Buttons ──────────────────────────────────── */
+.btn-primary {
+  @apply inline-flex items-center justify-center px-6 py-2.5 bg-stone-900 text-white text-sm font-medium tracking-widest uppercase transition-all duration-200 hover:bg-gold-600 focus:outline-none focus:ring-2 focus:ring-gold-400 focus:ring-offset-2;
+}
+.btn-secondary {
+  @apply inline-flex items-center justify-center px-6 py-2.5 border border-stone-900 text-stone-900 text-sm font-medium tracking-widest uppercase transition-all duration-200 hover:bg-stone-900 hover:text-white focus:outline-none;
+}
+.btn-ghost {
+  @apply inline-flex items-center justify-center px-4 py-2 text-stone-600 text-sm font-medium transition-colors duration-200 hover:text-stone-900 focus:outline-none;
 }
 
-@media (width > 1024px) {
-  body {
-    display: flex;
-
-  }
-
-  #app {
-  /*   width: var(--full-width); */
-    display: grid;
-    grid-template-columns: 1fr;
-  }
+/* ── Form inputs ──────────────────────────────── */
+.input-field {
+  @apply w-full px-4 py-3 bg-white border border-stone-200 text-stone-900 placeholder-stone-400 text-sm focus:outline-none focus:border-gold-500 transition-colors duration-200;
 }
+
+/* ── Cards ────────────────────────────────────── */
+.product-card {
+  @apply bg-white overflow-hidden transition-all duration-300 hover:shadow-lg;
+}
+
+/* ── Page wrapper ─────────────────────────────── */
+.page-wrapper {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12;
+}
+
+/* ── Section heading ──────────────────────────── */
+.section-title {
+  @apply font-serif text-3xl text-stone-900 mb-2;
+}
+.section-subtitle {
+  @apply text-stone-500 text-sm tracking-widest uppercase mb-10;
+}
+
+/* ── Divider ──────────────────────────────────── */
+.gold-divider {
+  @apply w-12 h-px bg-gold-500 mb-6;
+}
+
+/* ── Badge ────────────────────────────────────── */
+.badge-sale {
+  @apply absolute top-3 left-3 bg-gold-500 text-white text-xs font-semibold px-2 py-0.5 uppercase tracking-wider;
+}
+
+/* ── Scrollbar ────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f5f3ef; }
+::-webkit-scrollbar-thumb { background: #d4cdc0; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #b8ae9e; }
+
+a { text-decoration: none; color: inherit; }
